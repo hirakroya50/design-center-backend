@@ -1,0 +1,207 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  customer
+  partner
+  admin
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(customer)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  profile Profile?
+
+  @@map("users")
+}
+
+model Profile {
+  id        String    @id @db.Uuid
+  name      String?
+  phone     String?
+  avatarUrl String?   @map("avatar_url")
+  vendorId  String?   @unique @map("vendor_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  user             User              @relation(fields: [id], references: [id], onDelete: Cascade)
+  savedVendors     SavedVendor[]
+  savedServices    SavedService[]
+  shortlistVendors ShortlistVendor[]
+  consultations    Consultation[]
+  hostedVisitors   Visitor[]         @relation("HostessVisitors")
+  vendor           Vendor?           @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  @@map("profiles")
+}
+
+model Category {
+  id            String   @id
+  name          String
+  tagline       String?
+  description   String?
+  image         String?
+  subcategories String[]
+  vendorCount   Int      @default(0) @map("vendor_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  vendors  Vendor[]
+  services Service[]
+
+  @@map("categories")
+}
+
+model Vendor {
+  id               String   @id
+  name             String
+  shortDescription String?  @map("short_description")
+  description      String?
+  logoColor        String?  @map("logo_color")
+  cover            String?
+  gallery          String[]
+  projects         Json?
+  services         String[]
+  categoryId       String   @map("category_id")
+  contactPerson    String?  @map("contact_person")
+  phone            String?
+  email            String?
+  location         Json?
+  popular          Boolean  @default(false)
+  recommended      Boolean  @default(false)
+  rating           Decimal? @db.Decimal(3, 1)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  category      Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  savedBy       SavedVendor[]
+  shortlistBy   ShortlistVendor[]
+  consultations Consultation[]
+  profile       Profile?
+
+  @@index([categoryId])
+  @@map("vendors")
+}
+
+model Service {
+  id               String   @id
+  name             String
+  description      String?
+  image            String?
+  categoryId       String   @map("category_id")
+  relatedVendorIds String[] @map("related_vendor_ids")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  category Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  savedBy  SavedService[]
+
+  @@index([categoryId])
+  @@map("services")
+}
+
+model SavedVendor {
+  userId    String   @map("user_id") @db.Uuid
+  vendorId  String   @map("vendor_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@id([userId, vendorId])
+  @@map("saved_vendors")
+}
+
+model SavedService {
+  userId    String   @map("user_id") @db.Uuid
+  serviceId String   @map("service_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, serviceId])
+  @@map("saved_services")
+}
+
+model ShortlistVendor {
+  userId    String   @map("user_id") @db.Uuid
+  vendorId  String   @map("vendor_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@id([userId, vendorId])
+  @@map("shortlist_vendors")
+}
+
+model Consultation {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  vendorId    String   @map("vendor_id")
+  visitorName String   @map("visitor_name")
+  date        DateTime @db.Date
+  time        DateTime @db.Time
+  meetingType String   @map("meeting_type")
+  room        String
+  service     String
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user   Profile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  vendor Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([vendorId])
+  @@map("consultations")
+}
+
+model Visitor {
+  id                   String    @id @default(uuid()) @db.Uuid
+  fullName             String    @map("full_name")
+  email                String?
+  mobile               String?
+  city                 String?
+  projectLocation      String?   @map("project_location")
+  propertyType         String?   @map("property_type")
+  projectStage         String?   @map("project_stage")
+  designStyle          String?   @map("design_style")
+  budgetRange          String?   @map("budget_range")
+  interestedCategories String[]  @map("interested_categories")
+  leadSource           String?   @map("lead_source")
+  referrerName         String?   @map("referrer_name")
+  tourProgress         Int       @default(0) @map("tour_progress")
+  hostessId            String?   @map("hostess_id") @db.Uuid
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime? @updatedAt @map("updated_at")
+
+  hostess        Profile?        @relation("HostessVisitors", fields: [hostessId], references: [id], onDelete: SetNull)
+  timelineEvents TimelineEvent[]
+
+  @@index([hostessId])
+  @@map("visitors")
+}
+
+model TimelineEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  visitorId String   @map("visitor_id") @db.Uuid
+  label     String
+  detail    String?
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  visitor Visitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+
+  @@index([visitorId])
+  @@map("timeline_events")
+}
