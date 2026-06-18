@@ -10,7 +10,13 @@ describe('aggregateLeads', () => {
 
   it('counts pipeline stages in canonical order', () => {
     const { pipeline } = aggregateLeads(visitors);
-    expect(pipeline.map((p) => p.stage)).toEqual(['new', 'contacted', 'consultation', 'won', 'lost']);
+    expect(pipeline.map((p) => p.stage)).toEqual([
+      'new',
+      'contacted',
+      'consultation',
+      'won',
+      'lost',
+    ]);
     expect(pipeline.find((p) => p.stage === 'won')!.count).toBe(1);
     expect(pipeline.find((p) => p.stage === 'consultation')!.count).toBe(0);
   });
@@ -20,11 +26,20 @@ describe('aggregateLeads', () => {
     const walkin = leadSources.find((s) => s.source === 'Walk-in')!;
     expect(walkin.count).toBe(2);
     expect(walkin.pct).toBe(50);
-    expect(leadSources.map((s) => s.source)).toEqual(['Walk-in', 'Reference', 'Instagram', 'Website', 'Other']);
+    expect(leadSources.map((s) => s.source)).toEqual([
+      'Walk-in',
+      'Reference',
+      'Instagram',
+      'Website',
+      'Other',
+    ]);
   });
 
   it('maps unknown/null lead source to Other', () => {
-    const { leadSources } = aggregateLeads([{ stage: 'new', leadSource: null }, { stage: 'new', leadSource: 'Facebook' }]);
+    const { leadSources } = aggregateLeads([
+      { stage: 'new', leadSource: null },
+      { stage: 'new', leadSource: 'Facebook' },
+    ]);
     expect(leadSources.find((s) => s.source === 'Other')!.count).toBe(2);
   });
 

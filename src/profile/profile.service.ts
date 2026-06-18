@@ -22,7 +22,15 @@ export class ProfileService {
     };
   }
 
-  async update(userId: string, data: { name?: string; phone?: string; avatarUrl?: string; heardAboutUs?: string }) {
+  async update(
+    userId: string,
+    data: {
+      name?: string;
+      phone?: string;
+      avatarUrl?: string;
+      heardAboutUs?: string;
+    },
+  ) {
     await this.prisma.profile.upsert({
       where: { id: userId },
       create: { id: userId, ...data },

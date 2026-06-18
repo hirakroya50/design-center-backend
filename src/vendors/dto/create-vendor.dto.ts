@@ -1,4 +1,10 @@
-import { IsArray, IsBoolean, IsJSON, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsJSON,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateVendorDto {
   @IsString()

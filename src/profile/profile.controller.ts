@@ -15,7 +15,13 @@ export class ProfileController {
   @Put()
   update(
     @Request() req: { user: { id: string } },
-    @Body() body: { name?: string; phone?: string; avatarUrl?: string; heardAboutUs?: string },
+    @Body()
+    body: {
+      name?: string;
+      phone?: string;
+      avatarUrl?: string;
+      heardAboutUs?: string;
+    },
   ) {
     return this.profile.update(req.user.id, body);
   }

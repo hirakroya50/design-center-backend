@@ -20,6 +20,8 @@ export class ShortlistService {
   }
 
   remove(userId: string, vendorId: string) {
-    return this.prisma.shortlistVendor.deleteMany({ where: { userId, vendorId } });
+    return this.prisma.shortlistVendor.deleteMany({
+      where: { userId, vendorId },
+    });
   }
 }

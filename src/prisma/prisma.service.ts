@@ -4,9 +4,16 @@ import { PrismaClient } from '../generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor(config: ConfigService) {
-    super({ adapter: new PrismaPg({ connectionString: config.getOrThrow<string>('DATABASE_URL') }) });
+    super({
+      adapter: new PrismaPg({
+        connectionString: config.getOrThrow<string>('DATABASE_URL'),
+      }),
+    });
   }
 
   async onModuleInit() {

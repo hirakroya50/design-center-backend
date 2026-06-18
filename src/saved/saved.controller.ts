@@ -1,4 +1,12 @@
-import { Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SavedService } from './saved.service';
 
@@ -13,12 +21,18 @@ export class SavedController {
   }
 
   @Post('vendors/:id')
-  saveVendor(@Request() req: { user: { id: string } }, @Param('id') id: string) {
+  saveVendor(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
     return this.saved.saveVendor(req.user.id, id);
   }
 
   @Delete('vendors/:id')
-  unsaveVendor(@Request() req: { user: { id: string } }, @Param('id') id: string) {
+  unsaveVendor(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
     return this.saved.unsaveVendor(req.user.id, id);
   }
 
@@ -28,12 +42,18 @@ export class SavedController {
   }
 
   @Post('services/:id')
-  saveService(@Request() req: { user: { id: string } }, @Param('id') id: string) {
+  saveService(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
     return this.saved.saveService(req.user.id, id);
   }
 
   @Delete('services/:id')
-  unsaveService(@Request() req: { user: { id: string } }, @Param('id') id: string) {
+  unsaveService(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
     return this.saved.unsaveService(req.user.id, id);
   }
 }

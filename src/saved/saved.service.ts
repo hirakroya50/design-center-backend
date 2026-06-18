@@ -38,6 +38,8 @@ export class SavedService {
   }
 
   unsaveService(userId: string, serviceId: string) {
-    return this.prisma.savedService.deleteMany({ where: { userId, serviceId } });
+    return this.prisma.savedService.deleteMany({
+      where: { userId, serviceId },
+    });
   }
 }

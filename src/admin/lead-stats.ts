@@ -1,5 +1,17 @@
-export const LEAD_STAGES = ['new', 'contacted', 'consultation', 'won', 'lost'] as const;
-export const LEAD_SOURCES = ['Walk-in', 'Reference', 'Instagram', 'Website', 'Other'] as const;
+export const LEAD_STAGES = [
+  'new',
+  'contacted',
+  'consultation',
+  'won',
+  'lost',
+] as const;
+export const LEAD_SOURCES = [
+  'Walk-in',
+  'Reference',
+  'Instagram',
+  'Website',
+  'Other',
+] as const;
 
 export type LeadRow = { stage: string | null; leadSource: string | null };
 
@@ -11,7 +23,9 @@ export function aggregateLeads(visitors: LeadRow[]) {
     count: visitors.filter((v) => (v.stage ?? 'new') === stage).length,
   }));
 
-  const sourceCount: Record<string, number> = Object.fromEntries(LEAD_SOURCES.map((s) => [s, 0]));
+  const sourceCount: Record<string, number> = Object.fromEntries(
+    LEAD_SOURCES.map((s) => [s, 0]),
+  );
   for (const v of visitors) {
     const s =
       v.leadSource && (LEAD_SOURCES as readonly string[]).includes(v.leadSource)
