@@ -4,12 +4,15 @@ export class FollowUpDto {
   @IsIn(['advance', 'won', 'lost', 'note'])
   outcome!: 'advance' | 'won' | 'lost' | 'note';
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   note?: string;
 
-  @IsOptional() @IsDateString()
+  @IsOptional()
+  @IsDateString()
   nextFollowUpAt?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   lostReason?: string;
 }

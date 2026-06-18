@@ -32,19 +32,34 @@ export class VisitorsService {
   }
 
   create(hostessId: string | null, data: CreateVisitorDto) {
-    return this.prisma.visitor.create({ data: { ...(data as any), hostessId: hostessId ?? undefined } });
+    return this.prisma.visitor.create({
+      data: { ...(data as any), hostessId: hostessId ?? undefined },
+    });
   }
 
-  update(id: string, data: UpdateVisitorDto) {
-    return this.prisma.visitor.update({ where: { id }, data: data as any });
+  update(id: string, data: UpdateVisitorDto, isAuthed = false) {
+    const payload: any = { ...data };
+    if (!isAuthed) {
+      delete payload.stage;
+      delete payload.assignedPartnerId;
+      delete payload.lostReason;
+      delete payload.nextFollowUpAt;
+      delete payload.leadSource;
+    }
+    return this.prisma.visitor.update({ where: { id }, data: payload });
   }
 
-  addTimelineEvent(visitorId: string, data: { label: string; detail?: string }) {
+  addTimelineEvent(
+    visitorId: string,
+    data: { label: string; detail?: string },
+  ) {
     return this.prisma.timelineEvent.create({ data: { visitorId, ...data } });
   }
 
   async followUp(id: string, dto: FollowUpDto) {
-    const visitor = await this.prisma.visitor.findUniqueOrThrow({ where: { id } });
+    const visitor = await this.prisma.visitor.findUniqueOrThrow({
+      where: { id },
+    });
     let stage = visitor.stage ?? 'new';
     let lostReason: string | null = visitor.lostReason ?? null;
 
@@ -64,7 +79,9 @@ export class VisitorsService {
         stage,
         lostReason,
         lastContactedAt: new Date(),
-        nextFollowUpAt: dto.nextFollowUpAt ? new Date(dto.nextFollowUpAt) : visitor.nextFollowUpAt,
+        nextFollowUpAt: dto.nextFollowUpAt
+          ? new Date(dto.nextFollowUpAt)
+          : visitor.nextFollowUpAt,
       },
     });
 

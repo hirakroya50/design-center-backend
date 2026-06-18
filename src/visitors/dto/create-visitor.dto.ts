@@ -4,51 +4,68 @@ export class CreateVisitorDto {
   @IsString()
   fullName!: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   mobile?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   email?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   city?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   projectLocation?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   leadSource?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   referrerName?: string;
 
-  @IsOptional() @IsArray() @IsString({ each: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   interestedCategories?: string[];
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   propertyType?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   projectStage?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   budgetRange?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   designStyle?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   heardAboutUs?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   lookingFor?: string;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   tourProgress?: number;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   stage?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   assignedPartnerId?: string;
 }
