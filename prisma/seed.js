@@ -258,6 +258,20 @@ const VENDORS = [
 
 // ─── SERVICES ─────────────────────────────────────────────────────────────────
 
+// Vendor content extras (new fields: logo, tagline, established, highlights, viewCount)
+const VENDOR_EXTRAS = {
+  'atelier-roshan':     { logo: img('photo-1487958449943-2429e8be8625'), tagline: 'Light, material & quiet confidence', established: '2009', highlights: ['120+ landmark residences', 'RIBA-trained principals', 'Climate-first design', 'In-house 3D studio'], viewCount: 412 },
+  'studio-may':         { logo: img('photo-1616486338812-3dadae4b4ace'), tagline: 'Beauty through restraint', established: '2013', highlights: ['Selective client portfolio', 'Bespoke joinery detailing', 'Full FF&E service', 'Award-winning interiors'], viewCount: 357 },
+  'maison-bois':        { logo: img('photo-1538688525198-9b88f6f53126'), tagline: 'Heirloom furniture in solid wood', established: '2011', highlights: ['Sustainably sourced hardwood', 'Hand-cut joinery', '8-16 week bespoke builds', 'Lifetime craftsmanship'], viewCount: 318 },
+  'linen-silk-co':      { logo: img('photo-1505693416388-ac5ce068fe85'), tagline: 'Soft architecture, perfectly fitted', established: '2012', highlights: ['Belgian & Italian mills', 'In-house seamstresses', 'Motorised systems', 'On-site measurement'], viewCount: 198 },
+  'marbellos-stone':    { logo: img('photo-1615875605825-5eb9bb5d52ac'), tagline: 'Stone selected at origin', established: '2008', highlights: ['Slab selection at quarry', 'Bookmatching service', '10-year warranty', 'Italian & Turkish marble'], viewCount: 286 },
+  'decor-artiste':      { logo: img('photo-1513519245088-0e12902e5d4c'), tagline: 'Texture as expression', established: '2015', highlights: ['80+ wallpaper houses', 'Venetian plaster artisans', 'Custom 3D panels', 'Nationwide install'], viewCount: 176 },
+  'styling-house':      { logo: img('photo-1493809842364-78817add7ffb'), tagline: 'The finishing note', established: '2016', highlights: ['MENA artist network', 'Professional stylists', 'Custom framing', 'Greenery programmes'], viewCount: 152 },
+  'complete-spaces':    { logo: img('photo-1600585154340-be6161a56a0c'), tagline: 'End to end, effortless', established: '2010', highlights: ['Fixed-price contracts', 'Dedicated site manager', 'Weekly cost control', 'Single point of contact'], viewCount: 254 },
+  'forma-architecture': { logo: img('photo-1486325212027-8081e485255e'), tagline: 'Structure with intent', established: '2014', highlights: ['Heritage restoration', 'Authority submissions', 'MEP coordination', 'Mixed-use expertise'], viewCount: 134 },
+  'prestige-interiors': { logo: img('photo-1616593969747-4797dc75033e'), tagline: 'Considered, liveable luxury', established: '2012', highlights: ['Space planning specialists', 'Boutique hospitality', 'Executive offices', 'Turnkey delivery'], viewCount: 221 },
+};
+
 const SERVICES = [
   // Architecture
   { id: 'svc-arch-residential', name: 'Residential Architecture', categoryId: 'architecture', description: 'Custom residential design from concept to construction drawings. Covers site analysis, planning approvals, full architectural documentation and site supervision.', image: img('photo-1560518883-ce09059eeffa'), relatedVendorIds: ['atelier-roshan', 'forma-architecture'] },
@@ -498,6 +512,29 @@ function daysFromNow(n) {
   return d;
 }
 
+// Visitor CRM extras, index-aligned to VISITORS (stage, lead source, follow-up, assignment)
+// Stage spread: new x3, contacted x5, consultation x4, won x4, lost x2. 3 overdue follow-ups.
+const VISITOR_EXTRAS = [
+  { stage: 'consultation', source: 'Walk-in',   lookingFor: 'Full villa architecture + interior package for a Palm Jumeirah plot', lastContactedAt: daysAgo(2), nextFollowUpAt: daysFromNow(2), assignVendor: 'atelier-roshan' },
+  { stage: 'contacted',    source: 'Reference', lookingFor: 'Minimalist apartment interiors with a Scandinavian palette',            lastContactedAt: daysAgo(4), nextFollowUpAt: daysAgo(2) },
+  { stage: 'won',          source: 'Walk-in',   lookingFor: 'Heritage villa renovation — walls, surfaces & styling',                lastContactedAt: daysAgo(3), assignVendor: 'decor-artiste' },
+  { stage: 'new',          source: 'Instagram', lookingFor: 'Furniture and soft furnishings for a new Downtown apartment' },
+  { stage: 'consultation', source: 'Reference', lookingFor: 'Turnkey luxury villa build, AED 5M+ budget',                           lastContactedAt: daysAgo(1), nextFollowUpAt: daysFromNow(3), assignVendor: 'complete-spaces' },
+  { stage: 'contacted',    source: 'Website',   lookingFor: 'Corporate office fit-out in Riyadh',                                   lastContactedAt: daysAgo(5), nextFollowUpAt: daysAgo(3) },
+  { stage: 'consultation', source: 'Walk-in',   lookingFor: 'Scandinavian furniture and a styling refresh',                        lastContactedAt: daysAgo(2), nextFollowUpAt: daysFromNow(1), assignVendor: 'maison-bois' },
+  { stage: 'won',          source: 'Reference', lookingFor: 'Mediterranean villa — full design and furnishings',                   lastContactedAt: daysAgo(6), assignVendor: 'atelier-roshan' },
+  { stage: 'new',          source: 'Instagram', lookingFor: 'Marina apartment interiors with a feature wall' },
+  { stage: 'contacted',    source: 'Reference', lookingFor: 'Furniture, furnishings and surfaces for a Muscat villa',              lastContactedAt: daysAgo(2), nextFollowUpAt: daysFromNow(2) },
+  { stage: 'won',          source: 'Walk-in',   lookingFor: 'Luxury interiors and furniture, Emirates Hills',                      lastContactedAt: daysAgo(4), assignVendor: 'studio-may' },
+  { stage: 'lost',         source: 'Website',   lookingFor: 'DIFC office — architecture, surfaces, walls',                         lastContactedAt: daysAgo(8), lostReason: 'Project put on hold — budget reallocated' },
+  { stage: 'consultation', source: 'Reference', lookingFor: 'Classic European renovation, Jeddah villa',                          lastContactedAt: daysAgo(1), nextFollowUpAt: daysFromNow(4) },
+  { stage: 'contacted',    source: 'Instagram', lookingFor: 'Modern Indian fusion — furniture, walls and styling',                lastContactedAt: daysAgo(6), nextFollowUpAt: daysAgo(4) },
+  { stage: 'new',          source: 'Other',     lookingFor: 'Compact apartment interiors and furniture' },
+  { stage: 'lost',         source: 'Walk-in',   lookingFor: 'Apartment renovation — walls and furnishings',                       lastContactedAt: daysAgo(9), lostReason: 'Went with another provider' },
+  { stage: 'contacted',    source: 'Reference', lookingFor: 'French contemporary furniture and styling',                          lastContactedAt: daysAgo(3), nextFollowUpAt: daysFromNow(3) },
+  { stage: 'won',          source: 'Walk-in',   lookingFor: 'Complete villa renovation — signed turnkey',                         lastContactedAt: daysAgo(5), assignVendor: 'complete-spaces' },
+];
+
 const ROOMS = ['Consultation Room A', 'Consultation Room B', 'Executive Meeting Room', 'Online'];
 const MEETING_TYPES = ['Design Consultation', 'Vendor Meeting', 'Product Presentation', 'Architecture Discussion', 'Interior Design Discussion'];
 
@@ -525,6 +562,10 @@ const CONSULTATIONS = [
   { vendorId: 'complete-spaces',   visitorName: 'Rashid Al-Khoori',      service: 'Villa Project Management',  meetingType: 'Design Consultation',        room: 'Executive Meeting Room', date: daysAgo(10), time: new Date(0,0,0,11,0), status: 'completed' },
   { vendorId: 'marbellos-stone',   visitorName: 'Elena Petrov',          service: 'Marble & Stone Flooring',   meetingType: 'Product Presentation',       room: 'Consultation Room B',    date: daysAgo(12), time: new Date(0,0,0,15,0), status: 'completed' },
   { vendorId: 'prestige-interiors', visitorName: 'Abdullah Al-Sayed',    service: 'Full Space Design',         meetingType: 'Interior Design Discussion',  room: 'Consultation Room A',    date: daysAgo(14), time: new Date(0,0,0,13,0), status: 'completed' },
+
+  // Cancelled
+  { vendorId: 'studio-may',    visitorName: 'James Thornton', service: 'Space Planning',    meetingType: 'Design Consultation', room: 'Consultation Room A', date: daysAgo(3),     time: new Date(0,0,0,12,0), status: 'cancelled' },
+  { vendorId: 'linen-silk-co', visitorName: 'Maria Santos',   service: 'Custom Upholstery', meetingType: 'Vendor Meeting',      room: 'Online',              date: daysFromNow(6), time: new Date(0,0,0,13,0), status: 'cancelled' },
 ];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -564,10 +605,11 @@ async function main() {
   // 2. Vendors
   console.log('▸ Seeding vendors...');
   await Promise.all(VENDORS.map((v) => {
-    const { id, ...vUpdate } = v;
+    const full = { ...v, ...(VENDOR_EXTRAS[v.id] || {}) };
+    const { id, ...vUpdate } = full;
     return prisma.vendor.upsert({
       where: { id },
-      create: v,
+      create: full,
       update: vUpdate,
     });
   }));
@@ -608,68 +650,81 @@ async function main() {
   }
   console.log(`  ✓ ${CUSTOMER_USERS.length} customer users`);
 
-  // 7. Visitors with timeline events (skip if already seeded)
+  // 7. Visitors with timeline events + CRM pipeline state (reset for fresh demo data)
   console.log('▸ Seeding visitors...');
-  const existingVisitorCount = await prisma.visitor.count();
-  const visitorIds = [];
-  if (existingVisitorCount > 0) {
-    console.log(`  ⚠ Visitors already seeded (${existingVisitorCount} exist), skipping.`);
-  } else {
-    for (const v of VISITORS) {
-      const { timeline, ...rest } = v;
-      const visitor = await prisma.visitor.create({
-        data: {
-          fullName: rest.fullName,
-          email: rest.email,
-          mobile: rest.mobile,
-          city: rest.city,
-          projectLocation: rest.projectLocation,
-          propertyType: rest.propertyType,
-          projectStage: rest.projectStage,
-          budgetRange: rest.budgetRange,
-          designStyle: rest.designStyle,
-          leadSource: rest.leadSource,
-          referrerName: rest.referrerName ?? null,
-          interestedCategories: rest.interestedCategories,
-          tourProgress: rest.tourProgress,
-          createdAt: rest.createdAt,
-        },
-      });
-      visitorIds.push(visitor.id);
-      let timeOffset = 0;
-      for (const label of (timeline || [])) {
-        const ts = new Date(rest.createdAt.getTime() + timeOffset * 10 * 60 * 1000);
-        await prisma.timelineEvent.create({
-          data: { visitorId: visitor.id, label, timestamp: ts },
-        });
-        timeOffset++;
-      }
+  await prisma.timelineEvent.deleteMany({});
+  await prisma.visitor.deleteMany({});
+  const STAGE_FLOW = {
+    contacted: ['Stage → Contacted'],
+    consultation: ['Stage → Contacted', 'Stage → Consultation'],
+    won: ['Stage → Contacted', 'Stage → Consultation', 'Stage → Won'],
+    lost: ['Stage → Contacted', 'Stage → Lost'],
+  };
+  for (let i = 0; i < VISITORS.length; i++) {
+    const v = VISITORS[i];
+    const ex = VISITOR_EXTRAS[i] || {};
+    const { timeline, ...rest } = v;
+    const visitor = await prisma.visitor.create({
+      data: {
+        fullName: rest.fullName,
+        email: rest.email,
+        mobile: rest.mobile,
+        city: rest.city,
+        projectLocation: rest.projectLocation,
+        propertyType: rest.propertyType,
+        projectStage: rest.projectStage,
+        budgetRange: rest.budgetRange,
+        designStyle: rest.designStyle,
+        leadSource: ex.source ?? rest.leadSource,
+        referrerName: rest.referrerName ?? null,
+        interestedCategories: rest.interestedCategories,
+        tourProgress: rest.tourProgress,
+        createdAt: rest.createdAt,
+        stage: ex.stage ?? 'new',
+        heardAboutUs: ex.source ?? rest.leadSource,
+        lookingFor: ex.lookingFor ?? null,
+        lastContactedAt: ex.lastContactedAt ?? null,
+        nextFollowUpAt: ex.nextFollowUpAt ?? null,
+        lostReason: ex.lostReason ?? null,
+        assignedPartnerId: ex.assignVendor ? (partnerIds[ex.assignVendor] ?? null) : null,
+      },
+    });
+    let timeOffset = 0;
+    for (const label of (timeline || [])) {
+      const ts = new Date(rest.createdAt.getTime() + timeOffset * 10 * 60 * 1000);
+      await prisma.timelineEvent.create({ data: { visitorId: visitor.id, label, timestamp: ts } });
+      timeOffset++;
     }
-    console.log(`  ✓ ${VISITORS.length} visitors`);
+    // pipeline progression timeline (so lead detail shows follow-up history)
+    for (const label of (STAGE_FLOW[ex.stage] || [])) {
+      timeOffset++;
+      const detail = label.endsWith('Lost')
+        ? (ex.lostReason ?? undefined)
+        : (label.endsWith('Contacted') ? 'Follow-up call completed' : undefined);
+      const ts = new Date(rest.createdAt.getTime() + timeOffset * 60 * 60 * 1000);
+      await prisma.timelineEvent.create({ data: { visitorId: visitor.id, label, detail, timestamp: ts } });
+    }
   }
+  console.log(`  ✓ ${VISITORS.length} visitors (stages + follow-ups)`);
 
-  // 8. Consultations (skip if already seeded)
+  // 8. Consultations (reset for fresh demo data)
   console.log('▸ Seeding consultations...');
-  const existingConsultCount = await prisma.consultation.count();
-  if (existingConsultCount > 0) {
-    console.log(`  ⚠ Consultations already seeded (${existingConsultCount} exist), skipping.`);
-  } else {
-    for (const c of CONSULTATIONS) {
-      await prisma.consultation.create({
-        data: {
-          vendorId: c.vendorId,
-          visitorName: c.visitorName,
-          service: c.service,
-          meetingType: c.meetingType,
-          room: c.room,
-          date: c.date,
-          time: c.time,
-          status: c.status,
-        },
-      });
-    }
-    console.log(`  ✓ ${CONSULTATIONS.length} consultations`);
+  await prisma.consultation.deleteMany({});
+  for (const c of CONSULTATIONS) {
+    await prisma.consultation.create({
+      data: {
+        vendorId: c.vendorId,
+        visitorName: c.visitorName,
+        service: c.service,
+        meetingType: c.meetingType,
+        room: c.room,
+        date: c.date,
+        time: c.time,
+        status: c.status,
+      },
+    });
   }
+  console.log(`  ✓ ${CONSULTATIONS.length} consultations`);
 
   // 9. Saved vendors for customers (simulate user activity)
   console.log('▸ Seeding saved vendors & shortlists...');
@@ -748,7 +803,7 @@ async function main() {
     { userIdx: 0, vendorId: 'maison-bois',        visitorName: 'Sarah Al-Mansouri', service: 'Custom Sofa & Seating',     meetingType: 'Vendor Meeting',            room: 'Consultation Room A',    date: daysAgo(8),  time: new Date(0,0,0,10,0), status: 'completed' },
     { userIdx: 3, vendorId: 'complete-spaces',    visitorName: 'Omar Hassan',        service: 'Complete Home Renovation',  meetingType: 'Design Consultation',       room: 'Executive Meeting Room', date: daysAgo(15), time: new Date(0,0,0,15,0), status: 'completed' },
   ];
-  if (existingConsultCount === 0) {
+  {
     for (const c of customerConsultations) {
       const userId = customerIds[c.userIdx];
       if (!userId) continue;
