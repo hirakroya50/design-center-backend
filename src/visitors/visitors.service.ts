@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { FollowUpDto } from './dto/follow-up.dto';
 
 @Injectable()
 export class VisitorsService {
@@ -34,5 +35,47 @@ export class VisitorsService {
 
   addTimelineEvent(visitorId: string, data: { label: string; detail?: string }) {
     return this.prisma.timelineEvent.create({ data: { visitorId, ...data } });
+  }
+
+  private static NEXT_STAGE: Record<string, string> = {
+    new: 'contacted',
+    contacted: 'consultation',
+    consultation: 'won',
+  };
+
+  async followUp(id: string, dto: FollowUpDto) {
+    const visitor = await this.prisma.visitor.findUniqueOrThrow({ where: { id } });
+    let stage = visitor.stage ?? 'new';
+    let lostReason: string | null = visitor.lostReason ?? null;
+
+    if (dto.outcome === 'advance') {
+      stage = VisitorsService.NEXT_STAGE[stage] ?? stage; // terminal stays
+    } else if (dto.outcome === 'won') {
+      stage = 'won';
+    } else if (dto.outcome === 'lost') {
+      stage = 'lost';
+      lostReason = dto.lostReason ?? lostReason;
+    }
+    // 'note' leaves stage unchanged
+
+    const updated = await this.prisma.visitor.update({
+      where: { id },
+      data: {
+        stage,
+        lostReason,
+        lastContactedAt: new Date(),
+        nextFollowUpAt: dto.nextFollowUpAt ? new Date(dto.nextFollowUpAt) : visitor.nextFollowUpAt,
+      },
+    });
+
+    await this.prisma.timelineEvent.create({
+      data: {
+        visitorId: id,
+        label: dto.outcome === 'note' ? 'Follow-up note' : `Stage → ${stage}`,
+        detail: dto.note ?? undefined,
+      },
+    });
+
+    return updated;
   }
 }
