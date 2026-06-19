@@ -98,6 +98,6 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 Credentials:
-  Admin:   admin@designcenter.ae  /  Admin@123
-  Partner: partner.roshan@dc.ae   /  Partner@123
-  Customer: sarah.mansouri@gmail.com / Customer@123
+  Admin:   admin@designcenter.in  /  Admin@123
+  Partner: partner.griha@dc.in   /  Partner@123
+  Customer: sarah.menon@gmail.com / Customer@123
