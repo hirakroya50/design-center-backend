@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationChannel, WHATSAPP_CHANNEL } from './channels/channel.interface';
 
 export interface CreateNotificationInput {
   kind: string;
@@ -10,10 +11,13 @@ export interface CreateNotificationInput {
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(WHATSAPP_CHANNEL) private whatsapp: NotificationChannel,
+  ) {}
 
-  create(input: CreateNotificationInput) {
-    return this.prisma.notification.create({
+  async create(input: CreateNotificationInput) {
+    const notification = await this.prisma.notification.create({
       data: {
         kind: input.kind,
         title: input.title,
@@ -21,6 +25,13 @@ export class NotificationsService {
         visitorId: input.visitorId,
       },
     });
+
+    const WA_KINDS = ['new_lead', 'follow_up_reminder', 'consultation_request', 'lead_assignment'];
+    if (WA_KINDS.includes(input.kind)) {
+      await this.whatsapp.send(input.kind, input.title, input.subtitle).catch(() => {});
+    }
+
+    return notification;
   }
 
   list(limit = 50) {

@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationsService, CreateNotificationInput } from './notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { WHATSAPP_CHANNEL } from './channels/channel.interface';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
   let prisma: PrismaService;
+  let whatsapp: { send: jest.Mock };
 
   const mockPrisma = {
     notification: {
@@ -14,16 +16,21 @@ describe('NotificationsService', () => {
     },
   };
 
+  const mockWhatsapp = { send: jest.fn() };
+
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationsService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: WHATSAPP_CHANNEL, useValue: mockWhatsapp },
       ],
     }).compile();
 
     service = module.get<NotificationsService>(NotificationsService);
     prisma = module.get<PrismaService>(PrismaService);
+    whatsapp = module.get<{ send: jest.Mock }>(WHATSAPP_CHANNEL);
   });
 
   afterEach(() => {
@@ -77,6 +84,34 @@ describe('NotificationsService', () => {
           visitorId: undefined,
         },
       });
+    });
+
+    it.each(['new_lead', 'follow_up_reminder', 'consultation_request', 'lead_assignment'])(
+      'dispatches WhatsApp for WA_KIND %s',
+      async (kind) => {
+        const input: CreateNotificationInput = { kind, title: 'Test' };
+        mockPrisma.notification.create.mockResolvedValue({ id: 'n1', ...input });
+        mockWhatsapp.send.mockResolvedValue(undefined);
+
+        await service.create(input);
+        expect(mockWhatsapp.send).toHaveBeenCalledWith(kind, 'Test', undefined);
+      },
+    );
+
+    it('does not dispatch WhatsApp for non-WA kinds', async () => {
+      const input: CreateNotificationInput = { kind: 'alert', title: 'Alert' };
+      mockPrisma.notification.create.mockResolvedValue({ id: 'n1', ...input });
+
+      await service.create(input);
+      expect(mockWhatsapp.send).not.toHaveBeenCalled();
+    });
+
+    it('catches WhatsApp errors without propagating', async () => {
+      const input: CreateNotificationInput = { kind: 'new_lead', title: 'Test' };
+      mockPrisma.notification.create.mockResolvedValue({ id: 'n1', ...input });
+      mockWhatsapp.send.mockRejectedValue(new Error('API down'));
+
+      await expect(service.create(input)).resolves.toBeDefined();
     });
   });
 
