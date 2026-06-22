@@ -197,6 +197,7 @@ model Visitor {
   assignedPartnerId    String?   @map("assigned_partner_id") @db.Uuid
   tourProgress         Int       @default(0) @map("tour_progress")
   hostessId            String?   @map("hostess_id") @db.Uuid
+  crmExternalId        String?   @map("crm_external_id")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime? @updatedAt @map("updated_at")
 
@@ -210,7 +211,7 @@ model Visitor {
 
 model EmailOtp {
   id         String    @id @default(uuid()) @db.Uuid
-  email      String
+  email      String?
   mobile     String?
   codeHash   String    @map("code_hash")
   expiresAt  DateTime  @map("expires_at")

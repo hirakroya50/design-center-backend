@@ -16,8 +16,8 @@ describe('VisitorsService.followUp', () => {
       visitor: {
         findUniqueOrThrow: jest
           .fn()
-          .mockResolvedValue({ id: 'v1', stage: 'new' }),
-        findUnique: jest.fn().mockResolvedValue({ id: 'v1', stage: 'new' }),
+          .mockResolvedValue({ id: 'v1', stage: 'new', crmExternalId: 'mock-v1' }),
+        findUnique: jest.fn().mockResolvedValue({ id: 'v1', stage: 'new', crmExternalId: 'mock-v1' }),
         update: jest
           .fn()
           .mockImplementation(({ data }) =>
@@ -99,9 +99,14 @@ describe('VisitorsService.followUp', () => {
     expect(r.stage).toBe('won');
   });
 
-  it('calls crm.syncLead after create', async () => {
+  it('calls crm.syncLead after create and persists externalId', async () => {
     await service.create('h1', { fullName: 'Test' });
     expect(crm.syncLead).toHaveBeenCalled();
+    expect(prisma.visitor.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ crmExternalId: 'mock-v1' }),
+      }),
+    );
   });
 
   it('calls crm.updateLeadStage when stage changes in followUp', async () => {

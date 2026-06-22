@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class RoomBookingService {
     });
   }
 
-  bookRoom(
+  async bookRoom(
     roomId: string,
     dto: {
       date: string;
@@ -31,6 +31,21 @@ export class RoomBookingService {
       userId?: string;
     },
   ) {
+    const newStart = new Date(`1970-01-01T${dto.startAt}:00`);
+    const newEnd = new Date(`1970-01-01T${dto.endAt}:00`);
+
+    const overlapping = await this.prisma.roomBooking.findFirst({
+      where: {
+        roomId,
+        date: new Date(dto.date),
+        startAt: { lt: newEnd },
+        endAt: { gt: newStart },
+      },
+    });
+    if (overlapping) {
+      throw new BadRequestException('This time slot overlaps with an existing booking');
+    }
+
     return this.prisma.roomBooking.create({
       data: {
         roomId,

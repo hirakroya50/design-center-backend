@@ -22,10 +22,17 @@ export class SmsController {
 
   @Post('request-otp-sms')
   async requestOtpSms(@Body() dto: RequestOtpSmsDto) {
+    const recent = await this.prisma.emailOtp.findFirst({
+      where: { mobile: dto.mobile, createdAt: { gt: new Date(Date.now() - 60_000) } },
+    });
+    if (recent) {
+      throw new BadRequestException('Please wait a moment before requesting another code');
+    }
+
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const codeHash = await bcrypt.hash(code, 10);
     await this.prisma.emailOtp.create({
-      data: { email: '', mobile: dto.mobile, codeHash, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+      data: { mobile: dto.mobile, codeHash, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
     });
     await this.sms.send(dto.mobile, `Your Design Center code is: ${code}`);
     return { ok: true };

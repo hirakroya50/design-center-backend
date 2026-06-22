@@ -54,11 +54,11 @@ describe('SmsController', () => {
 
   describe('POST /auth/request-otp-sms', () => {
     it('generates OTP and sends SMS', async () => {
+      (prisma.emailOtp.findFirst as jest.Mock).mockResolvedValueOnce(null);
       const result = await controller.requestOtpSms({ mobile: '+971500000000' });
       expect(result).toEqual({ ok: true });
       expect(prisma.emailOtp.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          email: '',
           mobile: '+971500000000',
           codeHash: expect.any(String),
           expiresAt: expect.any(Date),

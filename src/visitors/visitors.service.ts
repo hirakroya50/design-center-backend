@@ -84,7 +84,7 @@ export class VisitorsService {
     const visitor = await this.prisma.visitor.create({
       data: { ...(data as any), hostessId: hostessId ?? undefined },
     });
-    this.crm
+    const externalId = await this.crm
       .syncLead({
         id: visitor.id,
         fullName: visitor.fullName,
@@ -94,6 +94,12 @@ export class VisitorsService {
         leadSource: visitor.leadSource ?? undefined,
       })
       .catch(() => {});
+    if (externalId) {
+      await this.prisma.visitor.update({
+        where: { id: visitor.id },
+        data: { crmExternalId: externalId },
+      });
+    }
     return visitor;
   }
 
@@ -113,13 +119,16 @@ export class VisitorsService {
     visitorId: string,
     data: { label: string; detail?: string },
   ) {
+    const visitor = await this.prisma.visitor.findUniqueOrThrow({
+      where: { id: visitorId },
+    });
     const event = await this.prisma.timelineEvent.create({
       data: { visitorId, ...data },
     });
     const note = data.detail
       ? `${data.label}: ${data.detail}`
       : data.label;
-    this.crm.createNote(visitorId, note).catch(() => {});
+    this.crm.createNote(visitor.crmExternalId ?? visitorId, note).catch(() => {});
     return event;
   }
 
@@ -156,7 +165,7 @@ export class VisitorsService {
     });
 
     if (stageChanged) {
-      this.crm.updateLeadStage(id, stage).catch(() => {});
+      this.crm.updateLeadStage(visitor.crmExternalId ?? id, stage).catch(() => {});
     }
 
     await this.prisma.timelineEvent.create({

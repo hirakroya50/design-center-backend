@@ -14,6 +14,7 @@ describe('RoomBookingService', () => {
       findMany: jest.fn(),
     },
     roomBooking: {
+      findFirst: jest.fn().mockResolvedValue(null),
       create: jest.fn(),
       findMany: jest.fn(),
     },
