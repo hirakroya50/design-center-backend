@@ -1,5 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { VisitorsService } from './visitors.service';
+import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 describe('VisitorsService.followUp', () => {
@@ -12,6 +14,7 @@ describe('VisitorsService.followUp', () => {
         findUniqueOrThrow: jest
           .fn()
           .mockResolvedValue({ id: 'v1', stage: 'new' }),
+        findUnique: jest.fn().mockResolvedValue({ id: 'v1', stage: 'new' }),
         update: jest
           .fn()
           .mockImplementation(({ data }) =>
@@ -24,6 +27,8 @@ describe('VisitorsService.followUp', () => {
       providers: [
         VisitorsService,
         { provide: PrismaService, useValue: prisma },
+        { provide: MailService, useValue: { sendFollowUp: jest.fn(), sendOtp: jest.fn() } },
+        { provide: NotificationsService, useValue: { create: jest.fn() } },
       ],
     }).compile();
     service = mod.get(VisitorsService);

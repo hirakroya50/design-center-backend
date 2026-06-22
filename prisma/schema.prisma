@@ -186,6 +186,8 @@ model Visitor {
   interestedCategories String[]  @map("interested_categories")
   leadSource           String?   @map("lead_source")
   referrerName         String?   @map("referrer_name")
+  referrerMobile       String?   @map("referrer_mobile")
+  referrerCategory     String?   @map("referrer_category")
   stage                String    @default("new")
   heardAboutUs         String?   @map("heard_about_us")
   lookingFor           String?   @map("looking_for")
@@ -200,6 +202,7 @@ model Visitor {
 
   hostess        Profile?        @relation("HostessVisitors", fields: [hostessId], references: [id], onDelete: SetNull)
   timelineEvents TimelineEvent[]
+  vendorVisits   VendorVisit[]
 
   @@index([hostessId])
   @@map("visitors")
@@ -243,4 +246,22 @@ model TimelineEvent {
 
   @@index([visitorId])
   @@map("timeline_events")
+}
+
+model VendorVisit {
+  id         String   @id @default(uuid()) @db.Uuid
+  visitorId  String   @map("visitor_id") @db.Uuid
+  vendorId   String   @map("vendor_id")
+  visitCount Int      @default(1) @map("visit_count")
+  firstVisit DateTime @default(now()) @map("first_visit")
+  lastVisit  DateTime @default(now()) @map("last_visit")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  visitor Visitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+
+  @@unique([visitorId, vendorId])
+  @@index([visitorId])
+  @@index([vendorId])
+  @@map("vendor_visits")
 }

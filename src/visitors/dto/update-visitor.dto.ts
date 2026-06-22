@@ -36,6 +36,14 @@ export class UpdateVisitorDto {
   referrerName?: string;
 
   @IsOptional()
+  @IsString()
+  referrerMobile?: string;
+
+  @IsOptional()
+  @IsString()
+  referrerCategory?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   interestedCategories?: string[];

@@ -64,10 +64,15 @@ export class VisitorsService {
   }
 
   async findOne(id: string) {
-    const v = await this.prisma.visitor.findUnique({
-      where: { id },
-      include: { timelineEvents: { orderBy: { timestamp: 'asc' } } },
-    });
+    let v;
+    try {
+      v = await this.prisma.visitor.findUnique({
+        where: { id },
+        include: { timelineEvents: { orderBy: { timestamp: 'asc' } } },
+      });
+    } catch {
+      throw new NotFoundException('Visitor not found');
+    }
     if (!v) throw new NotFoundException('Visitor not found');
     return v;
   }
