@@ -3,10 +3,13 @@ import { VisitorsService } from './visitors.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CRM_PROVIDER } from '../crm/crm-provider';
+import { CrmProvider } from '../crm/crm-provider';
 
 describe('VisitorsService.followUp', () => {
   let service: VisitorsService;
   let prisma: { visitor: any; timelineEvent: any };
+  let crm: CrmProvider;
 
   beforeEach(async () => {
     prisma = {
@@ -20,15 +23,29 @@ describe('VisitorsService.followUp', () => {
           .mockImplementation(({ data }) =>
             Promise.resolve({ id: 'v1', ...data }),
           ),
+        create: jest
+          .fn()
+          .mockImplementation(({ data }) =>
+            Promise.resolve({ id: 'v1', ...data }),
+          ),
       },
       timelineEvent: { create: jest.fn().mockResolvedValue({}) },
+    };
+    crm = {
+      syncLead: jest.fn().mockResolvedValue('mock-v1'),
+      updateLeadStage: jest.fn().mockResolvedValue(undefined),
+      createNote: jest.fn().mockResolvedValue(undefined),
     };
     const mod = await Test.createTestingModule({
       providers: [
         VisitorsService,
         { provide: PrismaService, useValue: prisma },
-        { provide: MailService, useValue: { sendFollowUp: jest.fn(), sendOtp: jest.fn() } },
+        {
+          provide: MailService,
+          useValue: { sendFollowUp: jest.fn(), sendOtp: jest.fn() },
+        },
         { provide: NotificationsService, useValue: { create: jest.fn() } },
+        { provide: CRM_PROVIDER, useValue: crm },
       ],
     }).compile();
     service = mod.get(VisitorsService);
@@ -80,5 +97,31 @@ describe('VisitorsService.followUp', () => {
     });
     const r = await service.followUp('v1', { outcome: 'advance' });
     expect(r.stage).toBe('won');
+  });
+
+  it('calls crm.syncLead after create', async () => {
+    await service.create('h1', { fullName: 'Test' });
+    expect(crm.syncLead).toHaveBeenCalled();
+  });
+
+  it('calls crm.updateLeadStage when stage changes in followUp', async () => {
+    await service.followUp('v1', { outcome: 'advance' });
+    expect(crm.updateLeadStage).toHaveBeenCalledWith(
+      expect.any(String),
+      'contacted',
+    );
+  });
+
+  it('does not call crm.updateLeadStage when stage unchanged', async () => {
+    await service.followUp('v1', { outcome: 'note' });
+    expect(crm.updateLeadStage).not.toHaveBeenCalled();
+  });
+
+  it('calls crm.createNote after addTimelineEvent', async () => {
+    await service.addTimelineEvent('v1', {
+      label: 'call',
+      detail: 'left msg',
+    });
+    expect(crm.createNote).toHaveBeenCalled();
   });
 });

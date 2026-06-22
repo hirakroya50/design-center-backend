@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { FollowUpDto } from './dto/follow-up.dto';
 import { UpdateVisitorDto } from './dto/update-visitor.dto';
+import { CrmProvider, CRM_PROVIDER } from '../crm/crm-provider';
 
 @Injectable()
 export class VisitorsService {
@@ -22,6 +24,7 @@ export class VisitorsService {
     private prisma: PrismaService,
     private mail: MailService,
     private notifications: NotificationsService,
+    @Inject(CRM_PROVIDER) private crm: CrmProvider,
   ) {}
 
   async sendEmail(id: string) {
@@ -77,10 +80,21 @@ export class VisitorsService {
     return v;
   }
 
-  create(hostessId: string | null, data: CreateVisitorDto) {
-    return this.prisma.visitor.create({
+  async create(hostessId: string | null, data: CreateVisitorDto) {
+    const visitor = await this.prisma.visitor.create({
       data: { ...(data as any), hostessId: hostessId ?? undefined },
     });
+    this.crm
+      .syncLead({
+        id: visitor.id,
+        fullName: visitor.fullName,
+        email: visitor.email ?? undefined,
+        mobile: visitor.mobile ?? undefined,
+        city: visitor.city ?? undefined,
+        leadSource: visitor.leadSource ?? undefined,
+      })
+      .catch(() => {});
+    return visitor;
   }
 
   update(id: string, data: UpdateVisitorDto, isAuthed = false) {
@@ -95,18 +109,26 @@ export class VisitorsService {
     return this.prisma.visitor.update({ where: { id }, data: payload });
   }
 
-  addTimelineEvent(
+  async addTimelineEvent(
     visitorId: string,
     data: { label: string; detail?: string },
   ) {
-    return this.prisma.timelineEvent.create({ data: { visitorId, ...data } });
+    const event = await this.prisma.timelineEvent.create({
+      data: { visitorId, ...data },
+    });
+    const note = data.detail
+      ? `${data.label}: ${data.detail}`
+      : data.label;
+    this.crm.createNote(visitorId, note).catch(() => {});
+    return event;
   }
 
   async followUp(id: string, dto: FollowUpDto) {
     const visitor = await this.prisma.visitor.findUniqueOrThrow({
       where: { id },
     });
-    let stage = visitor.stage ?? 'new';
+    const originalStage = visitor.stage ?? 'new';
+    let stage = originalStage;
     let lostReason: string | null = visitor.lostReason ?? null;
 
     if (dto.outcome === 'advance') {
@@ -119,6 +141,8 @@ export class VisitorsService {
     }
     // 'note' leaves stage unchanged
 
+    const stageChanged = stage !== originalStage;
+
     const updated = await this.prisma.visitor.update({
       where: { id },
       data: {
@@ -130,6 +154,10 @@ export class VisitorsService {
           : visitor.nextFollowUpAt,
       },
     });
+
+    if (stageChanged) {
+      this.crm.updateLeadStage(id, stage).catch(() => {});
+    }
 
     await this.prisma.timelineEvent.create({
       data: {
