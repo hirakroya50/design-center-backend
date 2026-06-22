@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { RolesGuard } from './roles.guard';
 import { SmsController } from './sms.controller';
 import { SmsModule } from './sms.module';
+import { SmsGreetingController } from './sms-greeting.controller';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { SmsModule } from './sms.module';
     }),
     SmsModule,
   ],
-  controllers: [AuthController, SmsController],
+  controllers: [AuthController, SmsController, SmsGreetingController],
   providers: [AuthService, JwtStrategy, RolesGuard],
   exports: [AuthService, JwtModule, RolesGuard],
 })
