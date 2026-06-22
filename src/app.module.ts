@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
 import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -33,6 +34,7 @@ import { VisitorsModule } from './visitors/visitors.module';
     ConsultationsModule,
     VisitorsModule,
     VendorVisitsModule,
+    ChatModule,
     AdminModule,
   ],
   controllers: [AppController],
