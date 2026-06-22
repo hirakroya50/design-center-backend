@@ -17,6 +17,7 @@ import { ShortlistModule } from './shortlist/shortlist.module';
 import { VendorsModule } from './vendors/vendors.module';
 import { VendorVisitsModule } from './vendor-visits/vendor-visits.module';
 import { VisitorsModule } from './visitors/visitors.module';
+import { RoomBookingModule } from './room-booking/room-booking.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { VisitorsModule } from './visitors/visitors.module';
     VendorVisitsModule,
     ChatModule,
     AdminModule,
+    RoomBookingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
