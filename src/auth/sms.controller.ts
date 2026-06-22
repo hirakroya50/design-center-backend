@@ -9,6 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { SMS_PROVIDER, SmsProvider } from './sms-provider';
+import { RequestOtpSmsDto } from './dto/request-otp-sms.dto';
+import { VerifyOtpSmsDto } from './dto/verify-otp-sms.dto';
 
 @Controller('auth')
 export class SmsController {
@@ -19,45 +21,39 @@ export class SmsController {
   ) {}
 
   @Post('request-otp-sms')
-  async requestOtpSms(@Body('mobile') mobile: string) {
+  async requestOtpSms(@Body() dto: RequestOtpSmsDto) {
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const codeHash = await bcrypt.hash(code, 10);
     await this.prisma.emailOtp.create({
-      data: { email: '', mobile, codeHash, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+      data: { email: '', mobile: dto.mobile, codeHash, expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
     });
-    await this.sms.send(mobile, `Your Design Center code is: ${code}`);
+    await this.sms.send(dto.mobile, `Your Design Center code is: ${code}`);
     return { ok: true };
   }
 
   @Post('verify-otp-sms')
-  async verifyOtpSms(
-    @Body('mobile') mobile: string,
-    @Body('code') code: string,
-  ) {
+  async verifyOtpSms(@Body() dto: VerifyOtpSmsDto) {
     const otp = await this.prisma.emailOtp.findFirst({
-      where: { mobile, consumedAt: null },
+      where: { mobile: dto.mobile, consumedAt: null },
       orderBy: { createdAt: 'desc' },
     });
     if (!otp || otp.expiresAt < new Date()) throw new BadRequestException('Code expired');
-    const valid = await bcrypt.compare(code, otp.codeHash);
+    const valid = await bcrypt.compare(dto.code, otp.codeHash);
     if (!valid) throw new BadRequestException('Invalid code');
     await this.prisma.emailOtp.update({
       where: { id: otp.id },
       data: { consumedAt: new Date() },
     });
-    let user = await this.prisma.user.findFirst({
-      where: { profile: { phone: mobile } },
+    const user = await this.prisma.user.upsert({
+      where: { email: `${dto.mobile}@sms.user` },
+      update: {},
+      create: {
+        email: `${dto.mobile}@sms.user`,
+        passwordHash: '',
+        role: 'customer',
+        profile: { create: { name: 'Mobile User', phone: dto.mobile } },
+      },
     });
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          email: `${mobile}@sms.user`,
-          passwordHash: '',
-          role: 'customer',
-          profile: { create: { name: 'Mobile User', phone: mobile } },
-        },
-      });
-    }
     const token = this.jwt.sign({ sub: user.id, role: user.role, email: user.email });
     return { token, user: { id: user.id, role: user.role } };
   }

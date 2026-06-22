@@ -31,8 +31,7 @@ describe('SmsController', () => {
               update: jest.fn().mockResolvedValue({}),
             },
             user: {
-              findFirst: jest.fn(),
-              create: jest.fn().mockResolvedValue(mockUser),
+              upsert: jest.fn().mockResolvedValue(mockUser),
             },
           },
         },
@@ -55,7 +54,7 @@ describe('SmsController', () => {
 
   describe('POST /auth/request-otp-sms', () => {
     it('generates OTP and sends SMS', async () => {
-      const result = await controller.requestOtpSms('+971500000000');
+      const result = await controller.requestOtpSms({ mobile: '+971500000000' });
       expect(result).toEqual({ ok: true });
       expect(prisma.emailOtp.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -78,9 +77,8 @@ describe('SmsController', () => {
         expiresAt: new Date(Date.now() + 600000),
         consumedAt: null,
       });
-      (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await controller.verifyOtpSms('+971500000000', '123456');
+      const result = await controller.verifyOtpSms({ mobile: '+971500000000', code: '123456' });
       expect(result).toHaveProperty('token', 'test-token');
       expect(result).toHaveProperty('user');
       expect(prisma.emailOtp.update).toHaveBeenCalled();
@@ -96,7 +94,47 @@ describe('SmsController', () => {
         consumedAt: null,
       });
 
-      await expect(controller.verifyOtpSms('+971500000000', '000000')).rejects.toThrow(BadRequestException);
+      await expect(controller.verifyOtpSms({ mobile: '+971500000000', code: '000000' })).rejects.toThrow(BadRequestException);
+    });
+
+    it('creates user on first login (upsert create path)', async () => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (prisma.emailOtp.findFirst as jest.Mock).mockResolvedValue({
+        id: 'otp-1',
+        mobile: '+971500000000',
+        codeHash: '$2b$10$hashedValue',
+        expiresAt: new Date(Date.now() + 600000),
+        consumedAt: null,
+      });
+
+      const newUser = { id: 'new-user', role: 'customer', email: '+971500000000@sms.user' };
+      (prisma.user.upsert as jest.Mock).mockResolvedValue(newUser);
+
+      const result = await controller.verifyOtpSms({ mobile: '+971500000000', code: '123456' });
+      expect(result).toHaveProperty('token', 'test-token');
+      expect(result.user.id).toBe('new-user');
+      expect(prisma.user.upsert).toHaveBeenCalledWith({
+        where: { email: '+971500000000@sms.user' },
+        update: {},
+        create: expect.objectContaining({
+          email: '+971500000000@sms.user',
+          passwordHash: '',
+          role: 'customer',
+          profile: { create: { name: 'Mobile User', phone: '+971500000000' } },
+        }),
+      });
+    });
+
+    it('fails on expired code', async () => {
+      (prisma.emailOtp.findFirst as jest.Mock).mockResolvedValue({
+        id: 'otp-1',
+        mobile: '+971500000000',
+        codeHash: '$2b$10$hashedValue',
+        expiresAt: new Date(Date.now() - 600000),
+        consumedAt: null,
+      });
+
+      await expect(controller.verifyOtpSms({ mobile: '+971500000000', code: '123456' })).rejects.toThrow(BadRequestException);
     });
   });
 });
