@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { RolesGuard } from './roles.guard';
+import { SmsController } from './sms.controller';
+import { SmsModule } from './sms.module';
 
 @Module({
   imports: [
@@ -18,8 +20,9 @@ import { RolesGuard } from './roles.guard';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    SmsModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, SmsController],
   providers: [AuthService, JwtStrategy, RolesGuard],
   exports: [AuthService, JwtModule, RolesGuard],
 })
