@@ -7,6 +7,7 @@ import {
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SmsProvider, SMS_PROVIDER } from '../auth/sms-provider';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { FollowUpDto } from './dto/follow-up.dto';
 import { UpdateVisitorDto } from './dto/update-visitor.dto';
@@ -25,7 +26,30 @@ export class VisitorsService {
     private mail: MailService,
     private notifications: NotificationsService,
     @Inject(CRM_PROVIDER) private crm: CrmProvider,
+    @Inject(SMS_PROVIDER) private sms: SmsProvider,
   ) {}
+
+  async sendSms(id: string) {
+    const visitor = await this.prisma.visitor.findUnique({ where: { id } });
+    if (!visitor) throw new NotFoundException('Visitor not found');
+    if (!visitor.mobile) {
+      throw new BadRequestException('Visitor has no mobile on file');
+    }
+    await this.sms.send(visitor.mobile, `Hi ${visitor.fullName}, this is a follow-up from Design Center. Let us know if you have any questions!`);
+
+    await this.prisma.timelineEvent.create({
+      data: {
+        visitorId: id,
+        label: 'SMS sent',
+        detail: visitor.mobile,
+      },
+    });
+    await this.prisma.visitor.update({
+      where: { id },
+      data: { lastContactedAt: new Date() },
+    });
+    return { ok: true };
+  }
 
   async sendEmail(id: string) {
     const visitor = await this.prisma.visitor.findUnique({ where: { id } });

@@ -87,4 +87,8 @@ export class UpdateVisitorDto {
   @IsOptional()
   @IsDateString()
   nextFollowUpAt?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

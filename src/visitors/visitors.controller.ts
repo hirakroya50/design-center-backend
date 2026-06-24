@@ -70,6 +70,12 @@ export class VisitorsController {
     return this.visitors.sendEmail(id);
   }
 
+  @Post(':id/sms')
+  @UseGuards(JwtAuthGuard)
+  sendSms(@Param('id') id: string) {
+    return this.visitors.sendSms(id);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {

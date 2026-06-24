@@ -198,6 +198,7 @@ model Visitor {
   tourProgress         Int       @default(0) @map("tour_progress")
   hostessId            String?   @map("hostess_id") @db.Uuid
   crmExternalId        String?   @map("crm_external_id")
+  notes                String?
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime? @updatedAt @map("updated_at")
 
