@@ -115,6 +115,10 @@ export class VisitorsService {
     return this.prisma.visitor.update({ where: { id }, data: payload });
   }
 
+  async remove(id: string) {
+    await this.prisma.visitor.delete({ where: { id } });
+  }
+
   async addTimelineEvent(
     visitorId: string,
     data: { label: string; detail?: string },

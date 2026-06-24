@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -67,5 +68,11 @@ export class VisitorsController {
   @UseGuards(JwtAuthGuard)
   sendEmail(@Param('id') id: string) {
     return this.visitors.sendEmail(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string) {
+    return this.visitors.remove(id);
   }
 }
